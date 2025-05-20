@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// チーム情報
+model Team {
+  id              String    @id @default(cuid())
+  name            String
+  wins            Int       @default(0)
+  losses          Int       @default(0)
+  points          Int       @default(0)
+  scoreFor        Int       @default(0)
+  scoreAgainst    Int       @default(0)
+  pointDifference Int       @default(0)
+  groupId         String
+  group           Group     @relation(fields: [groupId], references: [id])
+  homeMatches     Match[]   @relation("HomeTeam")
+  awayMatches     Match[]   @relation("AwayTeam")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// グループ情報
+model Group {
+  id         String   @id @default(cuid())
+  name       String
+  teams      Team[]
+  matches    Match[]
+  winner     String?
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// 試合情報
+model Match {
+  id          String   @id @default(cuid())
+  matchNumber Int
+  matchCode   String   @unique
+  team1Id     String
+  team2Id     String
+  team1Score  Int      @default(0)
+  team2Score  Int      @default(0)
+  team1       Team     @relation("HomeTeam", fields: [team1Id], references: [id])
+  team2       Team     @relation("AwayTeam", fields: [team2Id], references: [id])
+  winner      String?
+  startTime   DateTime?
+  endTime     DateTime?
+  status      String   @default("waiting")
+  group       Group    @relation(fields: [groupId], references: [id])
+  groupId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// トーナメント情報
+model Tournament {
+  id           String   @id @default(cuid())
+  name         String
+  sport        String
+  currentPhase String   @default("preliminary")
+  groups       Group[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// 編集履歴
+model EditHistory {
+  id        String   @id @default(cuid())
+  matchId   String
+  team1Score Int
+  team2Score Int
+  timestamp DateTime @default(now())
+}
