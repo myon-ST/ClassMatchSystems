@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma'
 // 個別試合の取得
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const match = await prisma.basketballMatch.findUnique({
-      where: { id: parseInt(params.id) }
+      where: { id: parseInt(id) }
     })
 
     if (!match) {
@@ -59,9 +60,10 @@ export async function GET(
 // 個別試合の更新
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const {
       team1FirstHalf,
@@ -83,7 +85,7 @@ export async function PUT(
     const team2Total = (team2FirstHalf || 0) + (team2SecondHalf || 0)
 
     const match = await prisma.basketballMatch.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: {
         ...(team1FirstHalf !== undefined && { team1FirstHalf }),
         ...(team1SecondHalf !== undefined && { team1SecondHalf }),

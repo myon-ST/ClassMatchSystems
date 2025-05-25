@@ -36,22 +36,10 @@ export interface BasketballMatch {
   endTime: string | null
   status: 'waiting' | 'in_progress' | 'finished'
   isFreeThrowNeeded: boolean
+  isEditing?: boolean
+  editHistory?: EditHistory[]
   createdAt: string
   updatedAt: string
-}
-
-// 旧Match型との互換性のためのエイリアス
-export interface Match extends BasketballMatch {}
-
-export interface Tournament {
-  matches: BasketballMatch[]
-}
-
-export interface SaveLog {
-  timestamp: string
-  matchCode: string
-  action: string
-  details: string
 }
 
 export interface BasketballRanking {
@@ -75,4 +63,18 @@ export interface BasketballStatistics {
   }
   freeThrowMatches: number
   lastUpdated: string
+}
+
+// 旧Match型との互換性のためのエイリアス
+export interface Match extends BasketballMatch {}
+
+export interface Tournament {
+  matches: BasketballMatch[]
+}
+
+export interface SaveLog {
+  timestamp: string
+  matchCode: string
+  action: string
+  details: string
 } 
