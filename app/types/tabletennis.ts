@@ -6,8 +6,8 @@ export interface TableTennisScore {
 
 export interface EditHistory {
   timestamp: string
-  type: 'score_change' | 'status_change' | 'time_change' | 'save'
-  description: string
+  action: string
+  details: string
 }
 
 export interface CategoryMatch {
@@ -49,7 +49,7 @@ export interface Match {
 }
 
 export interface Tournament {
-  matches: Match[]
+  matches: TableTennisMatch[]
 }
 
 export interface SaveLog {
@@ -69,4 +69,49 @@ export interface ClassResult {
     womens_doubles: number
     mixed_doubles: number
   }
+}
+
+export interface TableTennisSet {
+  team1: number
+  team2: number
+}
+
+export interface TableTennisGame {
+  set1: TableTennisSet
+  set2: TableTennisSet
+  set3: TableTennisSet
+  winner?: string
+}
+
+export interface TableTennisMatch {
+  id: string
+  matchCode: string
+  round: number
+  matchNumber: number
+  team1: string
+  team2: string
+  menSingles: TableTennisGame
+  womenSingles: TableTennisGame
+  menDoubles: TableTennisGame
+  womenDoubles: TableTennisGame
+  mixedDoubles: TableTennisGame
+  team1Wins: number
+  team2Wins: number
+  status: 'waiting' | 'in_progress' | 'finished'
+  winner?: string
+  scheduledTime: string
+  startTime: string
+  endTime: string
+  isEditing?: boolean
+  editHistory?: EditHistory[]
+}
+
+export interface TableTennisRanking {
+  id: number
+  className: string
+  rank: number | null
+  rankText: string | null
+  eliminatedAt: string | null
+  createdAt: string
+  updatedAt: string
 } 

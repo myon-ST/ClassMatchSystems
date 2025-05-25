@@ -10,28 +10,41 @@ export interface EditHistory {
   description: string
 }
 
-export interface Match {
+export interface BasketballMatch {
   id: string
+  matchCode: string
+  gender: 'men' | 'women'
   round: number
   matchNumber: number
   team1: string
   team2: string
   scores: {
-    team1: BasketballScore
-    team2: BasketballScore
+    team1: {
+      firstHalf: number
+      secondHalf: number
+      freeThrow: number
+    }
+    team2: {
+      firstHalf: number
+      secondHalf: number
+      freeThrow: number
+    }
   }
   winner: string | null
-  startTime: string
-  endTime: string
+  scheduledTime: string
+  startTime: string | null
+  endTime: string | null
   status: 'waiting' | 'in_progress' | 'finished'
-  matchCode: string
-  isEditing: boolean
-  editHistory: EditHistory[]
-  needsFreeThrow: boolean  // 同点時のフリースロー必要フラグ
+  isFreeThrowNeeded: boolean
+  createdAt: string
+  updatedAt: string
 }
 
+// 旧Match型との互換性のためのエイリアス
+export interface Match extends BasketballMatch {}
+
 export interface Tournament {
-  matches: Match[]
+  matches: BasketballMatch[]
 }
 
 export interface SaveLog {
@@ -39,4 +52,27 @@ export interface SaveLog {
   matchCode: string
   action: string
   details: string
+}
+
+export interface BasketballRanking {
+  id: number
+  className: string
+  gender: 'men' | 'women'
+  rank: number | null
+  rankText: string | null
+  eliminatedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BasketballStatistics {
+  totalMatches: number
+  completedMatches: number
+  highestScore: {
+    score: number
+    team: string
+    matchCode: string
+  }
+  freeThrowMatches: number
+  lastUpdated: string
 } 

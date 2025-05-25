@@ -1,13 +1,12 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from './components/Header'
-
-const inter = Inter({ subsets: ['latin'] })
+import { Suspense } from 'react'
+import Loading from './loading'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'クラスマッチ運営システム',
-  description: '高校のクラスマッチを管理・運営するためのシステムです。',
+  title: 'ClassMatch Systems',
+  description: '学校の体育祭やクラスマッチの試合管理システム',
 }
 
 export default function RootLayout({
@@ -16,11 +15,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ja">
-      <body className={inter.className}>
-        <Header />
-        {children}
+    <html lang="ja" className="h-full">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body className="min-h-full">
+        <div className="min-h-screen bg-gray-50">
+          <Suspense fallback={<Loading />}>
+            <Header />
+            <main className="pt-16">
+              {children}
+            </main>
+          </Suspense>
+        </div>
       </body>
     </html>
   )
-} 
+}

@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,74 +10,154 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// チーム情報
-model Team {
-  id              String    @id @default(cuid())
-  name            String
-  wins            Int       @default(0)
-  losses          Int       @default(0)
-  points          Int       @default(0)
-  scoreFor        Int       @default(0)
-  scoreAgainst    Int       @default(0)
-  pointDifference Int       @default(0)
-  groupId         String
-  group           Group     @relation(fields: [groupId], references: [id])
-  homeMatches     Match[]   @relation("HomeTeam")
-  awayMatches     Match[]   @relation("AwayTeam")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+model SoftballMatch {
+  id            Int      @id @default(autoincrement())
+  matchCode     String   @unique
+  round         Int
+  matchNumber   Int
+  team1         String
+  team2         String
+  team1Scores   String   // JSON string for innings array
+  team2Scores   String   // JSON string for innings array
+  team1Total    Int      @default(0)
+  team2Total    Int      @default(0)
+  status        String   @default("waiting") // waiting, in_progress, finished
+  winner        String?
+  scheduledTime String   @default("")
+  startTime     String   @default("")
+  endTime       String   @default("")
+  isJankenNeeded Boolean @default(false)
+  jankenWinner  String?
+  isHomeFirst   Boolean  @default(false) // 先行後攻の順序（trueの場合、team2が先攻、team1が後攻）
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("softball_matches")
 }
 
-// グループ情報
-model Group {
-  id         String   @id @default(cuid())
-  name       String
-  teams      Team[]
-  matches    Match[]
-  winner     String?
-  tournament Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model SoftballRanking {
+  id        Int      @id @default(autoincrement())
+  className String   @unique
+  rank      Int?     // 1位, 2位, 3位, 4位など
+  rankText  String?  // "1位", "2位", "3位", "4位", "ベスト8", "ベスト16", "ベスト19"
+  eliminatedAt String? // 敗退時の試合コード
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("softball_rankings")
 }
 
-// 試合情報
-model Match {
-  id          String   @id @default(cuid())
-  matchNumber Int
-  matchCode   String   @unique
-  team1Id     String
-  team2Id     String
-  team1Score  Int      @default(0)
-  team2Score  Int      @default(0)
-  team1       Team     @relation("HomeTeam", fields: [team1Id], references: [id])
-  team2       Team     @relation("AwayTeam", fields: [team2Id], references: [id])
-  winner      String?
-  startTime   DateTime?
-  endTime     DateTime?
-  status      String   @default("waiting")
-  group       Group    @relation(fields: [groupId], references: [id])
-  groupId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model BasketballMatch {
+  id              Int      @id @default(autoincrement())
+  matchCode       String   @unique
+  gender          String   // "men" or "women"
+  round           Int
+  matchNumber     Int
+  team1           String
+  team2           String
+  team1FirstHalf  Int      @default(0)
+  team1SecondHalf Int      @default(0)
+  team1FreeThrow  Int      @default(0)
+  team2FirstHalf  Int      @default(0)
+  team2SecondHalf Int      @default(0)
+  team2FreeThrow  Int      @default(0)
+  team1Total      Int      @default(0)
+  team2Total      Int      @default(0)
+  status          String   @default("waiting") // waiting, in_progress, finished
+  winner          String?
+  scheduledTime   String   @default("")
+  startTime       String   @default("")
+  endTime         String   @default("")
+  isFreeThrowNeeded Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("basketball_matches")
 }
 
-// トーナメント情報
-model Tournament {
-  id           String   @id @default(cuid())
-  name         String
-  sport        String
-  currentPhase String   @default("preliminary")
-  groups       Group[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model BasketballRanking {
+  id        Int      @id @default(autoincrement())
+  className String   
+  gender    String   // "men" or "women"
+  rank      Int?     // 1位, 2位, 3位, 4位など
+  rankText  String?  // "1位", "2位", "3位", "4位", "ベスト8", "ベスト16", "ベスト19"
+  eliminatedAt String? // 敗退時の試合コード
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([className, gender])
+  @@map("basketball_rankings")
 }
 
-// 編集履歴
-model EditHistory {
-  id        String   @id @default(cuid())
-  matchId   String
-  team1Score Int
-  team2Score Int
-  timestamp DateTime @default(now())
+model TableTennisMatch {
+  id                    Int      @id @default(autoincrement())
+  matchCode             String   @unique
+  round                 Int
+  matchNumber           Int
+  team1                 String
+  team2                 String
+  // 男子シングルス (11点3セットマッチ)
+  menSinglesTeam1Set1   Int      @default(0)
+  menSinglesTeam1Set2   Int      @default(0)
+  menSinglesTeam1Set3   Int      @default(0)
+  menSinglesTeam2Set1   Int      @default(0)
+  menSinglesTeam2Set2   Int      @default(0)
+  menSinglesTeam2Set3   Int      @default(0)
+  menSinglesWinner      String?
+  // 女子シングルス (11点3セットマッチ)
+  womenSinglesTeam1Set1 Int      @default(0)
+  womenSinglesTeam1Set2 Int      @default(0)
+  womenSinglesTeam1Set3 Int      @default(0)
+  womenSinglesTeam2Set1 Int      @default(0)
+  womenSinglesTeam2Set2 Int      @default(0)
+  womenSinglesTeam2Set3 Int      @default(0)
+  womenSinglesWinner    String?
+  // 男子ダブルス (11点3セットマッチ)
+  menDoublesTeam1Set1   Int      @default(0)
+  menDoublesTeam1Set2   Int      @default(0)
+  menDoublesTeam1Set3   Int      @default(0)
+  menDoublesTeam2Set1   Int      @default(0)
+  menDoublesTeam2Set2   Int      @default(0)
+  menDoublesTeam2Set3   Int      @default(0)
+  menDoublesWinner      String?
+  // 女子ダブルス (11点3セットマッチ)
+  womenDoublesTeam1Set1 Int      @default(0)
+  womenDoublesTeam1Set2 Int      @default(0)
+  womenDoublesTeam1Set3 Int      @default(0)
+  womenDoublesTeam2Set1 Int      @default(0)
+  womenDoublesTeam2Set2 Int      @default(0)
+  womenDoublesTeam2Set3 Int      @default(0)
+  womenDoublesWinner    String?
+  // ミックスダブルス (11点3セットマッチ)
+  mixedDoublesTeam1Set1 Int      @default(0)
+  mixedDoublesTeam1Set2 Int      @default(0)
+  mixedDoublesTeam1Set3 Int      @default(0)
+  mixedDoublesTeam2Set1 Int      @default(0)
+  mixedDoublesTeam2Set2 Int      @default(0)
+  mixedDoublesTeam2Set3 Int      @default(0)
+  mixedDoublesWinner    String?
+  // 試合全体の結果
+  team1Wins             Int      @default(0) // チーム1の勝利数
+  team2Wins             Int      @default(0) // チーム2の勝利数
+  status                String   @default("waiting") // waiting, in_progress, finished
+  winner                String?
+  scheduledTime         String   @default("")
+  startTime             String   @default("")
+  endTime               String   @default("")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("tabletennis_matches")
 }
+
+model TableTennisRanking {
+  id        Int      @id @default(autoincrement())
+  className String   @unique
+  rank      Int?     // 1位, 2位, 3位, 4位など
+  rankText  String?  // "1位", "2位", "3位", "4位", "ベスト8", "ベスト16", "ベスト19"
+  eliminatedAt String? // 敗退時の試合コード
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tabletennis_rankings")
+} 
